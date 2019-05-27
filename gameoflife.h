@@ -13,9 +13,9 @@ public:
     void setBlinkerBoard();
     void setGliderBoard();
 
-    int checkLivingNeighbours(const int &x, const int &y);
-    bool isLivingSurvive(const int& livings);
-    bool isDeadBecomeAlive(const int& livings);
+    int checkLivingNeighbours(int x, int y);
+    bool isLivingSurvive(int livings);
+    bool isDeadBecomeAlive(int livings);
 
     void copyBorders();
 
@@ -29,10 +29,12 @@ public:
     std::vector<std::vector<bool> > getBoardWithBorders() const;
 
 private:
-    int _numberOfIterations = 0;
+    int numberOfIterations = 0;
     size_t boardX, boardY;
     std::vector<std::vector<bool>> boardWithBorders;
     size_t leftBorder, rightBorder, firstBoardColumn, lastBoardColumn;
+
+    void setBordersConsts();
 };
 
 #endif // GAMEOFLIFE_H

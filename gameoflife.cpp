@@ -5,13 +5,18 @@
 
 #include "gameoflife.h"
 
-GameOfLife::GameOfLife(const size_t& sizeX, const size_t& sizeY)
-    : boardX(sizeX), boardY(sizeY), boardWithBorders(boardX, (std::vector<bool>(boardY))) {
-    //setBlinkerBoard();
+void GameOfLife::setBordersConsts()
+{
     leftBorder = 0;
     rightBorder = boardX-1;
     firstBoardColumn = 1;
     lastBoardColumn = boardX-2;
+}
+
+GameOfLife::GameOfLife(const size_t& sizeX, const size_t& sizeY)
+    : boardX(sizeX), boardY(sizeY), boardWithBorders(boardY, (std::vector<bool>(boardX))) {
+    //setBlinkerBoard();
+    setBordersConsts();
 }
 
 GameOfLife::GameOfLife(std::vector<std::vector<bool>> board)
@@ -28,10 +33,7 @@ GameOfLife::GameOfLife(std::vector<std::vector<bool>> board)
         }
     }
 
-    leftBorder = 0;
-    rightBorder = boardX-1;
-    firstBoardColumn = 1;
-    lastBoardColumn = boardX-2;
+    setBordersConsts();
 }
 
 void GameOfLife::setDeadBoard() {
@@ -56,9 +58,9 @@ void GameOfLife::setGliderBoard() {
     boardWithBorders[2][4] = true;
 }
 
-int GameOfLife::checkLivingNeighbours(const int &x, const int &y) {
+int GameOfLife::checkLivingNeighbours(int x, int y) {
 
-    constexpr std::array<std::pair<int, int>, 8> neighbours
+    constexpr std::array<std::pair<int, int>, 8> neighbours // m: always the same neighbours
     {
         std::make_pair(-1, -1),
         std::make_pair(0, -1),
@@ -72,24 +74,24 @@ int GameOfLife::checkLivingNeighbours(const int &x, const int &y) {
 
     int livings = 0;
 
-    for (auto& neighbour: neighbours)
+    for (auto& neighbour: neighbours) // m: iterations
         if (boardWithBorders[x + neighbour.first][y + neighbour.second])
-            livings++;
+            ++livings;
 
 
     return livings;
 };
 
-bool GameOfLife::isLivingSurvive(const int& livings) {
+bool GameOfLife::isLivingSurvive(int livings) {
     return livings == 2 or livings == 3;
 }
 
-bool GameOfLife::isDeadBecomeAlive(const int& livings) {
+bool GameOfLife::isDeadBecomeAlive(int livings) {
     return livings == 3;
 }
 
 void GameOfLife::copyBorders() {
-    for (auto &row : boardWithBorders) {
+    for (auto &row : boardWithBorders) { // m: every row
         row[leftBorder] = row[lastBoardColumn];
         row[rightBorder] = row[firstBoardColumn];
     }
@@ -97,10 +99,10 @@ void GameOfLife::copyBorders() {
 
 void GameOfLife::nextIteration() {
     copyBorders();
-    auto nextBoard = boardWithBorders;
+    auto nextBoard = boardWithBorders; // m: no templates names
 
-    for (auto i = 1; i < boardX-1; i++) {
-        for (auto j = 1; j < boardY-1; j++) {
+    for (size_t i = 1; i < boardY-1; i++) {
+        for (size_t j = 1; j < boardX-1; j++) {
             int livings = checkLivingNeighbours(i, j);
 
             if (boardWithBorders[i][j]) {
@@ -111,26 +113,27 @@ void GameOfLife::nextIteration() {
             }
         }
     }
+
     boardWithBorders = nextBoard;
 }
 
 void GameOfLife::doNumberOfIterations(const int &number) {
-    while (_numberOfIterations < number) {
-        ++_numberOfIterations;
+    while (numberOfIterations < number) {
+        ++numberOfIterations;
         nextIteration();
-        printBoardWithoutBorders();
+//        printBoardWithoutBorders();
     }
 }
 
 void GameOfLife::printNumberOfIterations() {
-    std::cout << "\nXXX " << _numberOfIterations << " XXX\n";
+    std::cout << "\nXXX " << numberOfIterations << " XXX\n";
 }
 
 void GameOfLife::printBoardWithoutBorders() {
     printNumberOfIterations();
 
-    for (int i = 1; i < boardX-1; ++i) {
-        for (int j = 1; j < boardY-1; ++j)
+    for (size_t i = 1; i < boardY-1; ++i) {
+        for (size_t j = 1; j < boardX-1; ++j)
             std::cout << /*_boardWithBorders[i][j]*/i << ',' << j << ' ';
 
         std::cout << '\n';
@@ -140,8 +143,8 @@ void GameOfLife::printBoardWithoutBorders() {
 void GameOfLife::printBoardWithBorders() {
     printNumberOfIterations();
 
-    for (int i = 1; i < boardX-1; ++i) {
-        for (int j = 1; j < boardY-1; ++j)
+    for (size_t i = 1; i < boardY-1; ++i) {
+        for (size_t j = 1; j < boardX-1; ++j)
             std::cout << boardWithBorders[i][j] << ' ';
 
         std::cout << '\n';

@@ -10,8 +10,8 @@ BoardPainter::BoardPainter(QPaintDevice * p_device,
                 : QPainter (p_device),
                   cellSize(p_cellSize),
                   boardWithBorders(p_board),
-                  width((boardWithBorders.size()-2) * p_cellSize),
-                  height((boardWithBorders[0].size()-2) * p_cellSize),
+                  width((boardWithBorders[0].size()-2) * p_cellSize),
+                  height((boardWithBorders.size()-2) * p_cellSize),
                   startBoard(p_xStartBoard, p_yStartBoard),
                   endBoard(p_xStartBoard + width, p_yStartBoard + height) {}
 
@@ -39,9 +39,6 @@ void BoardPainter::drawGrid()
 
         drawLine(startLine, endLine);
     }
-
-    drawLivingCell(1, 1);
-    drawDeadCell(1, 2);
 }
 
 void BoardPainter::drawCell(size_t cellCoordX, size_t cellCoordY)
@@ -76,11 +73,11 @@ void BoardPainter::drawDeadCell(size_t x, size_t y)
 void BoardPainter::drawBoardWithBorders()
 {
     constexpr size_t startBoardWithoutBorder = 1;
-    const size_t xEndBoardWithoutBorder = boardWithBorders.size() - 1;
-    const size_t yEndBoardWithoutBorder = boardWithBorders[0].size() - 1;
+    const size_t yEndBoardWithoutBorder = boardWithBorders.size() - 2;
+    const size_t xEndBoardWithoutBorder = boardWithBorders[0].size() - 2;
 
-    for (size_t i = startBoardWithoutBorder; i < xEndBoardWithoutBorder; ++i)
-        for (size_t j = startBoardWithoutBorder; j < yEndBoardWithoutBorder; ++j) {
+    for (size_t i = startBoardWithoutBorder; i <= yEndBoardWithoutBorder; ++i)
+        for (size_t j = startBoardWithoutBorder; j <= xEndBoardWithoutBorder; ++j) {
             const size_t iWithoutBorder = i-1;
             const size_t jWithoutBorder = j-1;
 
