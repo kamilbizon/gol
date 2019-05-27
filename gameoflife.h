@@ -4,10 +4,12 @@
 #include <array>
 #include <vector>
 
+using GoLBoard = std::vector<std::vector<bool>>;
+
 class GameOfLife {
 public:
     GameOfLife(const size_t& sizeX, const size_t& sizeY);
-    GameOfLife(std::vector<std::vector<bool>> board);
+    GameOfLife(GoLBoard board);
 
     void setDeadBoard();
     void setBlinkerBoard();
@@ -20,18 +22,18 @@ public:
     void copyBorders();
 
     void nextIteration();
-    void doNumberOfIterations(const int &number);
+    void doNumberOfIterations(int number);
 
     void printNumberOfIterations();
     void printBoardWithoutBorders();
     void printBoardWithBorders();
 
-    std::vector<std::vector<bool> > getBoardWithBorders() const;
+    GoLBoard getBoardWithBorders() const;
 
 private:
     int numberOfIterations = 0;
     size_t boardX, boardY;
-    std::vector<std::vector<bool>> boardWithBorders;
+    GoLBoard boardWithBorders;
     size_t leftBorder, rightBorder, firstBoardColumn, lastBoardColumn;
 
     void setBordersConsts();

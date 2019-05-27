@@ -19,15 +19,15 @@ GameOfLife::GameOfLife(const size_t& sizeX, const size_t& sizeY)
     setBordersConsts();
 }
 
-GameOfLife::GameOfLife(std::vector<std::vector<bool>> board)
+GameOfLife::GameOfLife(GoLBoard board)
     : boardX(board[0].size() + 80), boardY(board.size() + 80) {
 
-    boardWithBorders = std::vector<std::vector<bool>>(board.size() + 80, (std::vector<bool>(board[0].size() + 80)));
+    boardWithBorders = GoLBoard(board.size() + 80, (std::vector<bool>(board[0].size() + 80)));
 
     setDeadBoard();
 
-    for (int i=0; i < board.size(); ++i) {
-        for (int j=0; j < board[0].size(); ++j) {
+    for (size_t i=0; i < board.size(); ++i) {
+        for (size_t j=0; j < board[0].size(); ++j) {
 
             boardWithBorders[i+20][j+20] = board[i][j];
         }
@@ -117,7 +117,7 @@ void GameOfLife::nextIteration() {
     boardWithBorders = nextBoard;
 }
 
-void GameOfLife::doNumberOfIterations(const int &number) {
+void GameOfLife::doNumberOfIterations(int number) {
     while (numberOfIterations < number) {
         ++numberOfIterations;
         nextIteration();
@@ -151,7 +151,7 @@ void GameOfLife::printBoardWithBorders() {
     }
 }
 
-std::vector<std::vector<bool> > GameOfLife::getBoardWithBorders() const
+GoLBoard GameOfLife::getBoardWithBorders() const
 {
     return boardWithBorders;
 }

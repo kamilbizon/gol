@@ -29,8 +29,8 @@ void MainWindow::paintEvent(QPaintEvent *event)
     BoardPainter painter(this, game.getBoardWithBorders(), CELL_SIZE, X_START_DRAW, Y_START_DRAW);
     painter.DrawBoard();
 
-    constexpr int milisecondsInSecond = 1000;
-    int timeToFps = milisecondsInSecond / ui->fpsChanger->value();
+    constexpr int MILISECONDS_IN_SECOND = 1000; // never changing value
+    int timeToFps = MILISECONDS_IN_SECOND / ui->fpsChanger->value();
 
 
     if(ui->startStopCheck->isChecked()) {
@@ -48,6 +48,14 @@ void MainWindow::on_nextIterationButton_clicked()
 
 void MainWindow::on_startStopCheck_stateChanged(int arg1)
 {
+    qDebug() << ui->startStopCheck->isChecked();
+    if(ui->startStopCheck->isChecked()) {
+        ui->readFileButton->setEnabled(false);
+    }
+    else {
+        ui->readFileButton->setEnabled(true);
+    }
+
     update();
 }
 
@@ -63,13 +71,6 @@ void MainWindow::on_readFileButton_clicked()
         QTextStream fileStream(&file);
 
         auto newBoard = RLEParser().parse(fileStream);
-
-        for (int i = 0; i < newBoard.size(); ++i) {
-            for (int j = 0; j < newBoard[0].size(); ++j)
-                qDebug() << newBoard[i][j] << ' ';
-
-            qDebug() << '\n';
-        }
 
         game = GameOfLife(newBoard);
         update();
