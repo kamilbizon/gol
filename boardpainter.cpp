@@ -4,7 +4,7 @@
 using std::vector;
 
 BoardPainter::BoardPainter(QPaintDevice * p_device,
-                           const std::vector<std::vector<bool>> &p_board,
+                           const GoLBoard &p_board,
                            size_t p_cellSize,
                            size_t p_xStartBoard, size_t p_yStartBoard)
                 : QPainter (p_device),

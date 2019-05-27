@@ -63,7 +63,7 @@ auto RLEParser::findEmptyLines(QString section)
     return numberOfEmptyLines - normalLineEndingSymbol;
 }
 
-void RLEParser::addCells(std::vector<std::vector<bool> > &newBoard, size_t row, int numberOfCells, QChar tag)
+void RLEParser::addCells(GoLBoard &newBoard, size_t row, int numberOfCells, QChar tag)
 {
     if(tag == 'b')
         while (numberOfCells--)
@@ -73,7 +73,7 @@ void RLEParser::addCells(std::vector<std::vector<bool> > &newBoard, size_t row, 
             newBoard[row].push_back(true);
 }
 
-void RLEParser::fillEmptyLines(std::vector<std::vector<bool> > &newBoard, size_t startRow, int rowSize, int numberOfEmptyLines)
+void RLEParser::fillEmptyLines(GoLBoard &newBoard, size_t startRow, int rowSize, int numberOfEmptyLines)
 {
     while(numberOfEmptyLines > 0){
         addCells(newBoard, startRow, rowSize, 'b');
@@ -83,7 +83,7 @@ void RLEParser::fillEmptyLines(std::vector<std::vector<bool> > &newBoard, size_t
 
 
 
-void RLEParser::fillNewBoard(vector<vector<bool> > &newBoard, QTextStream &fileStream, int rowSize, int numRows)
+void RLEParser::fillNewBoard(GoLBoard &newBoard, QTextStream &fileStream, int rowSize, int numRows)
 {
     size_t row = 0;
 
@@ -140,7 +140,7 @@ void RLEParser::fillNewBoard(vector<vector<bool> > &newBoard, QTextStream &fileS
     }
 }
 
-vector<vector<bool>> RLEParser::parse(QTextStream &fileStream)
+GoLBoard RLEParser::parse(QTextStream &fileStream)
 {
     auto firstLine = skipComments(fileStream);
     auto boardSize = readFirstLine(firstLine);

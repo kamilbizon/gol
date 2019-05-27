@@ -4,7 +4,8 @@
 #include <array>
 #include <vector>
 
-using GoLBoard = std::vector<std::vector<bool>>;
+using GoLBoard = std::vector<std::vector<bool>>; // m: name that data structure
+                                                // no need to own class imo
 
 class GameOfLife {
 public:

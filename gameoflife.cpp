@@ -60,7 +60,7 @@ void GameOfLife::setGliderBoard() {
 
 int GameOfLife::checkLivingNeighbours(int x, int y) {
 
-    constexpr std::array<std::pair<int, int>, 8> neighbours // m: always the same neighbours
+    constexpr std::array<std::pair<int, int>, 8> neighbours // m: always the same neighbours, known at compile time
     {
         std::make_pair(-1, -1),
         std::make_pair(0, -1),

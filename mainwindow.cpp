@@ -29,7 +29,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
     BoardPainter painter(this, game.getBoardWithBorders(), CELL_SIZE, X_START_DRAW, Y_START_DRAW);
     painter.DrawBoard();
 
-    constexpr int MILISECONDS_IN_SECOND = 1000; // never changing value
+    constexpr int MILISECONDS_IN_SECOND = 1000; // m: never changing value
     int timeToFps = MILISECONDS_IN_SECOND / ui->fpsChanger->value();
 
 

@@ -8,7 +8,7 @@
 #include "boardpainter.h"
 #include "gameoflife.h"
 
-constexpr int CELL_SIZE = 7; // easy to change values known at compile time
+constexpr int CELL_SIZE = 7; // m: easy to change values known at compile time
 constexpr int BOARD_SIZE = 100;
 constexpr int X_START_DRAW = 150;
 constexpr int Y_START_DRAW = 20;

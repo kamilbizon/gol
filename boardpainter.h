@@ -3,13 +3,14 @@
 
 #include <QPainter>
 #include <QMainWindow>
+#include "gameoflife.h"
 #include <memory>
 
 class BoardPainter: QPainter
 {
 public:
     BoardPainter(QPaintDevice * p_device,
-                 const std::vector<std::vector<bool>> &p_board,
+                 const GoLBoard &p_board,
                  size_t p_cellSize,
                  size_t p_xStartBoard, size_t p_yStartBoard);
 
@@ -18,7 +19,7 @@ public:
 
 private:
     const size_t cellSize;
-    const std::vector<std::vector<bool>> boardWithBorders;
+    const GoLBoard boardWithBorders;
     const size_t width, height;
     const QPoint startBoard, endBoard;
 
