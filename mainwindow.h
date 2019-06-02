@@ -35,6 +35,8 @@ private slots:
 
     void on_readFileButton_clicked();
 
+    void on_previousIterationButton_clicked();
+
 private:
     GameOfLife game{BOARD_SIZE, BOARD_SIZE};
     Ui::MainWindow *ui;

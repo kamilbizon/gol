@@ -2,8 +2,11 @@
 #include <iostream>
 #include <tuple>
 #include <algorithm>
+#include <thread>
 
 #include "gameoflife.h"
+
+#include <qdebug.h>
 
 void GameOfLife::setBordersConsts()
 {
@@ -15,7 +18,6 @@ void GameOfLife::setBordersConsts()
 
 GameOfLife::GameOfLife(const size_t& sizeX, const size_t& sizeY)
     : boardX(sizeX), boardY(sizeY), boardWithBorders(boardY, (std::vector<bool>(boardX))) {
-    //setBlinkerBoard();
     setBordersConsts();
 }
 
@@ -37,28 +39,13 @@ GameOfLife::GameOfLife(GoLBoard board)
 }
 
 void GameOfLife::setDeadBoard() {
-    for (auto& row: boardWithBorders)
+    for (auto& row: boardWithBorders) // m:auto
         for (auto &&cell : row)
             cell = false;
 }
 
-void GameOfLife::setBlinkerBoard() {
-    setDeadBoard();
 
-    boardWithBorders[3][2] = true;
-    boardWithBorders[3][3] = true;
-    boardWithBorders[3][4] = true;
-}
-
-void GameOfLife::setGliderBoard() {
-    boardWithBorders[4][3] = true;
-    boardWithBorders[4][4] = true;
-    boardWithBorders[4][5] = true;
-    boardWithBorders[3][5] = true;
-    boardWithBorders[2][4] = true;
-}
-
-int GameOfLife::checkLivingNeighbours(int x, int y) {
+int GameOfLife::checkLivingNeighbours(size_t x, size_t y) {
 
     constexpr std::array<std::pair<int, int>, 8> neighbours // m: always the same neighbours, known at compile time
     {
@@ -103,7 +90,7 @@ void GameOfLife::nextIteration() {
 
     for (size_t i = 1; i < boardY-1; i++) {
         for (size_t j = 1; j < boardX-1; j++) {
-            int livings = checkLivingNeighbours(i, j);
+            auto livings = checkLivingNeighbours(i, j);
 
             if (boardWithBorders[i][j]) {
                 nextBoard[i][j] = isLivingSurvive(livings);
@@ -117,13 +104,92 @@ void GameOfLife::nextIteration() {
     boardWithBorders = nextBoard;
 }
 
-void GameOfLife::doNumberOfIterations(int number) {
-    while (numberOfIterations < number) {
-        ++numberOfIterations;
-        nextIteration();
-//        printBoardWithoutBorders();
+void GameOfLife::calcNextGeneration(GoLBoard boardCopy, GoLBoard &nextBoard, size_t start, size_t end)
+{   
+    size_t iNextBoard = 1;
+    for (size_t i = start; i < end-1; i++) {
+        for (size_t j = 1; j < boardX-1; j++) {
+            auto livings = checkLivingNeighbours(i, j);
+
+            if (boardCopy[i][j]) {
+                nextBoard[iNextBoard][j] = isLivingSurvive(livings);
+            }
+            else if (not boardCopy[i][j]) {
+                nextBoard[iNextBoard][j] = isDeadBecomeAlive(livings);
+            }
+        }
+        ++iNextBoard;
     }
 }
+
+void GameOfLife::nextIterationThreads()
+{
+    copyBorders();
+
+//    auto nextBoard = boardWithBorders;
+
+    long half_size = boardY / 2;
+
+    GoLBoard b1(boardWithBorders.begin(), boardWithBorders.begin() + half_size);
+    GoLBoard b2(boardWithBorders.begin() + half_size, boardWithBorders.end());
+
+    auto calcFunPtr = std::mem_fn(&GameOfLife::calcNextGeneration);
+
+    std::thread t1(calcFunPtr, this, boardWithBorders, std::ref(b1), 1, half_size);
+    std::thread t2(calcFunPtr, this, boardWithBorders, std::ref(b2), half_size, boardY);
+
+    t1.join(); t2.join();
+
+    b1.insert(b1.end(),
+              std::make_move_iterator(b2.begin()),
+              std::make_move_iterator(b2.end())); // m: no templates names
+
+    boardWithBorders = std::move(b1);
+}
+
+void GameOfLife::doNumberOfIterations(int number) {
+    while (number > 0) {
+        if(currentIteration == numberOfIterations) {
+//            nextIterationThreads();
+            nextIteration();
+            iterSaver.addIterationBoard(boardWithBorders);
+
+            ++numberOfIterations;
+            ++currentIteration;
+        }
+        else {
+            boardWithBorders = iterSaver.getIterationBoard(currentIteration);
+            ++currentIteration;
+        }
+
+        --number;
+    }
+}
+
+void GameOfLife::previousIteration() {
+    if(currentIteration > 0){
+        --currentIteration;
+        boardWithBorders = iterSaver.getIterationBoard(currentIteration);
+    }
+}
+
+GoLBoard GameOfLife::getBoardWithBorders() const
+{
+    return boardWithBorders;
+}
+
+void GameOfLife::PreviousIterationsSaver::addIterationBoard(GoLBoard board)
+{
+    previousIterations.push_back(board);
+}
+
+GoLBoard GameOfLife::PreviousIterationsSaver::getIterationBoard(size_t iteration) {
+    return previousIterations[iteration];
+}
+
+
+
+#ifdef DEBUG
 
 void GameOfLife::printNumberOfIterations() {
     std::cout << "\nXXX " << numberOfIterations << " XXX\n";
@@ -134,7 +200,7 @@ void GameOfLife::printBoardWithoutBorders() {
 
     for (size_t i = 1; i < boardY-1; ++i) {
         for (size_t j = 1; j < boardX-1; ++j)
-            std::cout << /*_boardWithBorders[i][j]*/i << ',' << j << ' ';
+            std::cout << i << ',' << j << ' ';
 
         std::cout << '\n';
     }
@@ -151,7 +217,5 @@ void GameOfLife::printBoardWithBorders() {
     }
 }
 
-GoLBoard GameOfLife::getBoardWithBorders() const
-{
-    return boardWithBorders;
-}
+#endif
+

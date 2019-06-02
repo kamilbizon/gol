@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    game.setGliderBoard();
 }
 
 MainWindow::~MainWindow()
@@ -35,14 +34,20 @@ void MainWindow::paintEvent(QPaintEvent *event)
 
     if(ui->startStopCheck->isChecked()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(timeToFps));
-        game.nextIteration();
+        game.doNumberOfIterations(1);
         update();
     }
 }
 
 void MainWindow::on_nextIterationButton_clicked()
 {
-    game.nextIteration();
+    game.doNumberOfIterations(1);
+    update();
+}
+
+void MainWindow::on_previousIterationButton_clicked()
+{
+    game.previousIteration();
     update();
 }
 
@@ -70,9 +75,10 @@ void MainWindow::on_readFileButton_clicked()
     else {
         QTextStream fileStream(&file);
 
-        auto newBoard = RLEParser().parse(fileStream);
+        auto newBoard = RLEParser().parseFile(fileStream);
 
         game = GameOfLife(newBoard);
         update();
     }
 }
+

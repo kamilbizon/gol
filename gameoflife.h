@@ -3,6 +3,7 @@
 
 #include <array>
 #include <vector>
+#include "rleparser.h"
 
 using GoLBoard = std::vector<std::vector<bool>>; // m: name that data structure
                                                 // no need to own class imo
@@ -13,16 +14,20 @@ public:
     GameOfLife(GoLBoard board);
 
     void setDeadBoard();
-    void setBlinkerBoard();
-    void setGliderBoard();
 
-    int checkLivingNeighbours(int x, int y);
+    int checkLivingNeighbours(size_t x, size_t y);
     bool isLivingSurvive(int livings);
     bool isDeadBecomeAlive(int livings);
 
     void copyBorders();
+    void calcNextGeneration(GoLBoard boardCopy,
+                            GoLBoard &nextBoard,
+                            size_t start, size_t end);
 
     void nextIteration();
+    void nextIterationThreads();
+
+    void previousIteration();
     void doNumberOfIterations(int number);
 
     void printNumberOfIterations();
@@ -31,11 +36,28 @@ public:
 
     GoLBoard getBoardWithBorders() const;
 
+
 private:
-    int numberOfIterations = 0;
+    unsigned numberOfIterations = 0;
+    unsigned currentIteration = 0;
     size_t boardX, boardY;
     GoLBoard boardWithBorders;
     size_t leftBorder, rightBorder, firstBoardColumn, lastBoardColumn;
+
+    class PreviousIterationsSaver {
+    public:
+        void addIterationBoard(GoLBoard);
+        GoLBoard getIterationBoard(size_t iteration);
+
+        void saveIterationToFile(size_t iteration);
+        void removeFiles();
+
+        std::vector<GoLBoard> previousIterations{};
+    private:
+        RLEParser parser{};
+    };
+
+    PreviousIterationsSaver iterSaver{};
 
     void setBordersConsts();
 };

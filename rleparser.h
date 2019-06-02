@@ -3,16 +3,19 @@
 
 #include <vector>
 #include <QTextStream>
-#include "gameoflife.h"
+//#include "gameoflife.h"
+
+using GoLBoard = std::vector<std::vector<bool>>;
 
 class RLEParser
 {
 public:
     RLEParser();
 
-    GoLBoard parse(QTextStream &fileStream);
+    GoLBoard parseFile(QTextStream &fileStream);
+    void parseBoardToRLE(GoLBoard);
 private:
-    auto skipComments(QTextStream &fileStream);
+    auto skipComments(QTextStream &fileStream); // m: return auto
     auto readFirstLine(QString& line);
     void fillNewBoard(GoLBoard & newBoard, QTextStream &fileStream, int rowSize, int numRows);
     auto findSections(QString &line);

@@ -81,8 +81,6 @@ void RLEParser::fillEmptyLines(GoLBoard &newBoard, size_t startRow, int rowSize,
     }
 }
 
-
-
 void RLEParser::fillNewBoard(GoLBoard &newBoard, QTextStream &fileStream, int rowSize, int numRows)
 {
     size_t row = 0;
@@ -140,7 +138,7 @@ void RLEParser::fillNewBoard(GoLBoard &newBoard, QTextStream &fileStream, int ro
     }
 }
 
-GoLBoard RLEParser::parse(QTextStream &fileStream)
+GoLBoard RLEParser::parseFile(QTextStream &fileStream)
 {
     auto firstLine = skipComments(fileStream);
     auto boardSize = readFirstLine(firstLine);
