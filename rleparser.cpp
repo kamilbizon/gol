@@ -77,6 +77,7 @@ void RLEParser::fillEmptyLines(GoLBoard &newBoard, size_t startRow, int rowSize,
 {
     while(numberOfEmptyLines > 0){
         addCells(newBoard, startRow, rowSize, 'b');
+        ++startRow;
         --numberOfEmptyLines;
     }
 }
@@ -93,7 +94,8 @@ void RLEParser::fillNewBoard(GoLBoard &newBoard, QTextStream &fileStream, int ro
     auto sections = findSections(allLines);
 
     for (auto& section : sections) {
-
+        if(section.compare("!") == 0)
+            break;
 
         int numOfUnfilledCells = rowSize;
 
@@ -123,7 +125,7 @@ void RLEParser::fillNewBoard(GoLBoard &newBoard, QTextStream &fileStream, int ro
         auto numberOfEmptyLines = findEmptyLines(section);
 
         if(numberOfEmptyLines > 0){
-            int nextRow = row + 1;
+            auto nextRow = row + 1;
             fillEmptyLines(newBoard, nextRow, rowSize, numberOfEmptyLines);
             row += numberOfEmptyLines;
         }
@@ -147,5 +149,130 @@ GoLBoard RLEParser::parseFile(QTextStream &fileStream)
     fillNewBoard(newBoard, fileStream, boardSize.first, boardSize.second);
 
     return newBoard;
+}
+
+QString RLEParser::addHeader(GoLBoard &boardWithBorders)
+{
+    const unsigned long rowSizeWithBorders = boardWithBorders[0].size();
+    const unsigned long columnSizeWithBorders = boardWithBorders.size();
+
+    return QStringLiteral("x = %1, y = %2\n").arg(rowSizeWithBorders).arg(columnSizeWithBorders);
+}
+
+QString RLEParser::parseBoardCells(GoLBoard &boardWithBorders)
+{
+    QString rleToSave{""};
+
+    bool lastCellSign;
+     lastCellSign = boardWithBorders[0][0];
+
+    unsigned numberOfTheSameSignsInRow = 0;
+
+    for(size_t i = 0; i < boardWithBorders.size(); i++) {
+        for(size_t j = 0; j < boardWithBorders.size(); j++) {
+            if(boardWithBorders[i][j] == lastCellSign)
+                ++numberOfTheSameSignsInRow;
+            else {
+                if(lastCellSign){
+
+                    if(numberOfTheSameSignsInRow == 1)
+                        rleToSave += "o";
+                    else
+                        rleToSave += QString::number(numberOfTheSameSignsInRow) + "o";
+
+
+                    numberOfTheSameSignsInRow = 1;
+                    lastCellSign = boardWithBorders[i][j];
+                }
+                else {
+
+                    if(numberOfTheSameSignsInRow == 1)
+                        rleToSave += "b";
+                    else
+                        rleToSave += QString::number(numberOfTheSameSignsInRow) + "b";
+
+                    numberOfTheSameSignsInRow = 1;
+                    lastCellSign = boardWithBorders[i][j];
+                }
+            }
+        }
+
+        if(numberOfTheSameSignsInRow != 0) {
+            if(lastCellSign){
+                rleToSave += QString::number(numberOfTheSameSignsInRow) + "o";
+
+                numberOfTheSameSignsInRow = 0;
+
+                if(i < boardWithBorders.size()-1)
+                    lastCellSign = boardWithBorders.at(i+1).at(0);
+            }
+            else {
+                rleToSave += QString::number(numberOfTheSameSignsInRow) + "b";
+
+                numberOfTheSameSignsInRow = 0;
+
+                if(i < boardWithBorders.size()-1)
+                    lastCellSign = boardWithBorders.at(i+1).at(0);
+            }
+        }
+
+        rleToSave += "$";
+    }
+
+    rleToSave += "!";
+
+    return rleToSave;
+}
+
+QString RLEParser::buildBasicRLEFile(GoLBoard &boardWithBorders)
+{
+    QString rleToSave{""};
+
+    rleToSave += addHeader(boardWithBorders);
+    rleToSave += parseBoardCells(boardWithBorders);
+
+    return rleToSave;
+}
+
+void RLEParser::ignoreHeader(QStringList &lines)
+{
+    lines[0].remove(0, lines[0].indexOf("\n") + 1);
+}
+
+void RLEParser::removeEmptyLines(QString &rleToSave, const unsigned long boardRowSizeWithBorders)
+{
+    auto lines = rleToSave.split("$");
+    ignoreHeader(lines);
+
+    QString emptyLine = QStringLiteral("%1b").arg(boardRowSizeWithBorders);
+
+    auto numberOfEmptyLines = 0;
+
+    for(auto& line : lines) {
+
+        if(line.compare(emptyLine) == 0)
+            ++numberOfEmptyLines;
+
+        else if(numberOfEmptyLines > 0) {
+
+            auto startEmptyLinesBlock = rleToSave.indexOf(emptyLine);
+            auto emptyLinesBlockLength = QString(emptyLine + "$").size() * numberOfEmptyLines;
+            QString toReplace = QStringLiteral("%1$").arg(numberOfEmptyLines);
+
+            rleToSave.replace(startEmptyLinesBlock, emptyLinesBlockLength, toReplace);
+
+            numberOfEmptyLines = 0;
+        }
+    }
+}
+
+void RLEParser::parseBoardToRLE(GoLBoard boardWithBorders, QTextStream &fileStream)
+{
+    auto rleToSave = buildBasicRLEFile(boardWithBorders);
+
+    const auto boardRowSizeWithBorders = boardWithBorders[0].size();
+    removeEmptyLines(rleToSave, boardRowSizeWithBorders);
+
+    fileStream << rleToSave;
 }
 

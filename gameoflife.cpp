@@ -8,6 +8,9 @@
 
 #include <qdebug.h>
 
+constexpr size_t BOARD_X_SIZE = 140;
+constexpr size_t BOARD_Y_SIZE = 140;
+
 void GameOfLife::setBordersConsts()
 {
     leftBorder = 0;
@@ -22,9 +25,9 @@ GameOfLife::GameOfLife(const size_t& sizeX, const size_t& sizeY)
 }
 
 GameOfLife::GameOfLife(GoLBoard board)
-    : boardX(board[0].size() + 80), boardY(board.size() + 80) {
+    : boardX(BOARD_X_SIZE), boardY(BOARD_Y_SIZE) {
 
-    boardWithBorders = GoLBoard(board.size() + 80, (std::vector<bool>(board[0].size() + 80)));
+    boardWithBorders = GoLBoard(BOARD_Y_SIZE, (std::vector<bool>(BOARD_X_SIZE)));
 
     setDeadBoard();
 
@@ -180,11 +183,37 @@ GoLBoard GameOfLife::getBoardWithBorders() const
 
 void GameOfLife::PreviousIterationsSaver::addIterationBoard(GoLBoard board)
 {
-    previousIterations.push_back(board);
+    previousIterations.emplace_back(board);
+    auto iteration = previousIterations.size() - 1;
+
+    QString filePath = QStringLiteral("./tempBoardFile_%1.rle").arg(iteration);
+
+    QFile file(filePath);
+
+    if(file.open(QFile::WriteOnly | QFile::Truncate | QFile::Text)){
+        QTextStream out(&file);
+        parser.parseBoardToRLE(board, out);
+
+        file.close();
+    }
 }
 
 GoLBoard GameOfLife::PreviousIterationsSaver::getIterationBoard(size_t iteration) {
-    return previousIterations[iteration];
+    QString filePath = QStringLiteral("./tempBoardFile_%1.rle").arg(iteration);
+    QFile file(filePath);
+
+    QTextStream in(&file);
+    qDebug() << "1";
+    if(file.open(QFile::ReadOnly)){
+        qDebug() << "2";
+        auto board = parser.parseFile(in);
+        qDebug() << "3";
+        file.close();
+
+        return board;
+    }
+
+//        return previousIterations[iteration];
 }
 
 
