@@ -52,8 +52,9 @@ private:
         void saveIterationToFile(size_t iteration);
         void removeFiles();
 
-        std::vector<GoLBoard> previousIterations{};
     private:
+        unsigned iterations = 0;
+        std::vector<GoLBoard> previousIterations{};
         RLEParser parser{};
     };
 

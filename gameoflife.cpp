@@ -183,8 +183,9 @@ GoLBoard GameOfLife::getBoardWithBorders() const
 
 void GameOfLife::PreviousIterationsSaver::addIterationBoard(GoLBoard board)
 {
-    previousIterations.emplace_back(board);
-    auto iteration = previousIterations.size() - 1;
+//    previousIterations.emplace_back(board);
+    ++iterations;
+    auto iteration = iterations - 1; // previousIterations.size() - 1;
 
     QString filePath = QStringLiteral("./tempBoardFile_%1.rle").arg(iteration);
 
@@ -203,17 +204,12 @@ GoLBoard GameOfLife::PreviousIterationsSaver::getIterationBoard(size_t iteration
     QFile file(filePath);
 
     QTextStream in(&file);
-    qDebug() << "1";
     if(file.open(QFile::ReadOnly)){
-        qDebug() << "2";
         auto board = parser.parseFile(in);
-        qDebug() << "3";
         file.close();
 
         return board;
     }
-
-//        return previousIterations[iteration];
 }
 
 
