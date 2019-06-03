@@ -46,16 +46,19 @@ private:
 
     class PreviousIterationsSaver {
     public:
+        ~PreviousIterationsSaver();
+
         void addIterationBoard(GoLBoard);
         GoLBoard getIterationBoard(size_t iteration);
+
+    private:
+        unsigned iterations = 0;
+        RLEParser parser{};
 
         void saveIterationToFile(size_t iteration);
         void removeFiles();
 
-    private:
-        unsigned iterations = 0;
-        std::vector<GoLBoard> previousIterations{};
-        RLEParser parser{};
+        void saveIterationToFile(GoLBoard &board, unsigned iteration);
     };
 
     PreviousIterationsSaver iterSaver{};

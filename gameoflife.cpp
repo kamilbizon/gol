@@ -154,6 +154,7 @@ void GameOfLife::doNumberOfIterations(int number) {
     while (number > 0) {
         if(currentIteration == numberOfIterations) {
 //            nextIterationThreads();
+
             nextIteration();
             iterSaver.addIterationBoard(boardWithBorders);
 
@@ -181,12 +182,8 @@ GoLBoard GameOfLife::getBoardWithBorders() const
     return boardWithBorders;
 }
 
-void GameOfLife::PreviousIterationsSaver::addIterationBoard(GoLBoard board)
+void GameOfLife::PreviousIterationsSaver::saveIterationToFile(GoLBoard &board, unsigned iteration)
 {
-//    previousIterations.emplace_back(board);
-    ++iterations;
-    auto iteration = iterations - 1; // previousIterations.size() - 1;
-
     QString filePath = QStringLiteral("./tempBoardFile_%1.rle").arg(iteration);
 
     QFile file(filePath);
@@ -197,6 +194,29 @@ void GameOfLife::PreviousIterationsSaver::addIterationBoard(GoLBoard board)
 
         file.close();
     }
+}
+
+GameOfLife::PreviousIterationsSaver::~PreviousIterationsSaver()
+{
+    for (unsigned iteration = 0; iteration < iterations; ++iteration) {
+        QString filePath = QStringLiteral("./tempBoardFile_%1.rle").arg(iteration);
+        QFile file(filePath);
+
+        if(not file.remove())
+            qDebug() << "not removed " << filePath;
+    }
+}
+
+void GameOfLife::PreviousIterationsSaver::addIterationBoard(GoLBoard board)
+{
+    ++iterations;
+    auto iteration = iterations - 1; // previousIterations.size() - 1;
+
+//    auto saveFunPtr = std::mem_fn(PreviousIterationsSaver::saveIterationToFile);
+//    std::thread t1{saveFunPtr, this, board, iteration};
+//    t1.join();
+
+    saveIterationToFile(board, iteration);
 }
 
 GoLBoard GameOfLife::PreviousIterationsSaver::getIterationBoard(size_t iteration) {
